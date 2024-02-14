@@ -1,0 +1,7 @@
+.vscode
+
+snap
+
+node2vec/node2vec
+fn2v/fair_node2vec
+fairwalk/__pycache__
