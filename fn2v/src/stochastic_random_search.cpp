@@ -245,18 +245,11 @@ double find_max_step(graph &g, std::vector<double> &current_point, std::vector<d
     // Stores at <point> the candidate_point = current + step_direction.
     get_candidate_point(current_point, step_direction, point, dimension);
     // Start time for loss calculation.
-    //loss_start_time = std::chrono::high_resolution_clock::now();
     
     //Residual Node2Vec
     calc_transmtrx(g, fairn2v_args.transmtrx, fairn2v_args.initial_transmtrx, fairn2v_args.residuals, point);
     node2vec(fairn2v_args.net, fairn2v_args.transmtrx, fairn2v_args.dim, fairn2v_args.walklen, fairn2v_args.numwalks, fairn2v_args.winsize, fairn2v_args.iter, fairn2v_args.verbose, fairn2v_args.walks, fairn2v_args.embeddings);
-    //calc_transmtrx(g, transmtrx, initial_transmtrx, residuals, current_point);
-    //node2vec(InNet, transmtrx, Dimensions, WalkLen, NumWalks, WinSize, Iter, Verbose, OutputWalks, WalksVV, temp_fair_embeddings);
     temp_loss_function_value = loss_function_at(g, embeddings, fairn2v_args.embeddings, fairn2v_args.dim);
-
-    // Get temp custmo LFPR and its loss value at candidate_point.
-    //temp_pagerank = algs.get_custom_step_fair_pagerank(point);
-    //temp_loss_function_value = loss_function_at(pagerank, temp_pagerank, dimension);
 
     // Find step (alogn with sign) for reduction direction.
     while(!is_reduction_direction(current_loss_function_value, temp_loss_function_value)) {
@@ -271,24 +264,15 @@ double find_max_step(graph &g, std::vector<double> &current_point, std::vector<d
         // Same as before.
         step_direction = get_step_direction(step, direction, dimension);
         get_candidate_point(current_point, step_direction, point, dimension);
-        // Start time for loss calculation.
-        //loss_start_time = std::chrono::high_resolution_clock::now();
-
+        
         //Residual Node2Vec
-	calc_transmtrx(g, fairn2v_args.transmtrx, fairn2v_args.initial_transmtrx, fairn2v_args.residuals, point);
+	    calc_transmtrx(g, fairn2v_args.transmtrx, fairn2v_args.initial_transmtrx, fairn2v_args.residuals, point);
         node2vec(fairn2v_args.net, fairn2v_args.transmtrx, fairn2v_args.dim, fairn2v_args.walklen, fairn2v_args.numwalks, fairn2v_args.winsize, fairn2v_args.iter, fairn2v_args.verbose, fairn2v_args.walks, fairn2v_args.embeddings);
-        //calc_transmtrx(g, transmtrx, initial_transmtrx, residuals, current_point);
-        //node2vec(InNet, transmtrx, Dimensions, WalkLen, NumWalks, WinSize, Iter, Verbose, OutputWalks, WalksVV, temp_fair_embeddings);
         temp_loss_function_value = loss_function_at(g, embeddings, fairn2v_args.embeddings, fairn2v_args.dim);
-
-        // Get temp custmo LFPR and its loss value at candidate_point.
-        //temp_pagerank = algs.get_custom_step_fair_pagerank(point);
-        //temp_loss_function_value = loss_function_at(pagerank, temp_pagerank, dimension);
 
         // If step is smaller than allowed, return 0 step
         // (i.e. stay at the same point).
         if (abs(step) < SMALLER_ALLOWED_STEP) {
-            //std::cout << "zero step";
             step = 0;
             step_direction = get_step_direction(step, direction, dimension);
             get_candidate_point(current_point, step_direction, point, dimension);
@@ -296,11 +280,6 @@ double find_max_step(graph &g, std::vector<double> &current_point, std::vector<d
 	    calc_transmtrx(g, fairn2v_args.transmtrx, fairn2v_args.initial_transmtrx, fairn2v_args.residuals, point);
             node2vec(fairn2v_args.net, fairn2v_args.transmtrx, fairn2v_args.dim, fairn2v_args.walklen, fairn2v_args.numwalks, fairn2v_args.winsize, fairn2v_args.iter, fairn2v_args.verbose, fairn2v_args.walks, fairn2v_args.embeddings);
             temp_loss_function_value = loss_function_at(g, embeddings, fairn2v_args.embeddings, fairn2v_args.dim);
-
-            //temp_pagerank = algs.get_custom_step_fair_pagerank(point);
-            // Important to renew the temp_loss_function_value.
-            // Not in this control, but keep it for cohesion.
-            //temp_loss_function_value = loss_function_at(pagerank, temp_pagerank, dimension);
 
             return step;
         }
@@ -315,7 +294,6 @@ double find_max_step(graph &g, std::vector<double> &current_point, std::vector<d
 	std::cout << "Step: " << step << std::endl;
         }
         if (abs(step) < SMALLER_ALLOWED_STEP) {
-            //std::cout << "zero step";
             step = 0;
             step_direction = get_step_direction(step, direction, dimension);
             get_candidate_point(current_point, step_direction, point, dimension);
@@ -323,9 +301,6 @@ double find_max_step(graph &g, std::vector<double> &current_point, std::vector<d
         calc_transmtrx(g, fairn2v_args.transmtrx, fairn2v_args.initial_transmtrx, fairn2v_args.residuals, point);
         node2vec(fairn2v_args.net, fairn2v_args.transmtrx, fairn2v_args.dim, fairn2v_args.walklen, fairn2v_args.numwalks, fairn2v_args.winsize, fairn2v_args.iter, fairn2v_args.verbose, fairn2v_args.walks, fairn2v_args.embeddings);
         temp_loss_function_value = loss_function_at(g, embeddings, fairn2v_args.embeddings, fairn2v_args.dim);
-
-        //temp_pagerank = algs.get_custom_step_fair_pagerank(point);
-        //temp_loss_function_value = loss_function_at(pagerank, temp_pagerank, dimension);
     }
 
     return step;

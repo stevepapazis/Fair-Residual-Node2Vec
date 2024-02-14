@@ -13,16 +13,6 @@ graph::graph(const std::string &graph_filename, const std::string &com_filename)
 	load_graph(graph_filename);
 }
 
-/* graph::~graph() */
-/* { */
-/* 	if (nodes) */
-/* 		delete [] nodes; */
-/* 	if (communities) */
-/* 		delete [] communities; */
-/* 	if (attributes) */
-/* 		delete [] attributes; */
-/* } */
-
 void graph::load_graph(const std::string &graph_filename)
 {
 	std::ifstream infile(graph_filename);

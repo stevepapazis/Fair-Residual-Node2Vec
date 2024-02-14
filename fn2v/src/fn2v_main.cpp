@@ -62,7 +62,6 @@ void ParseArgs(int& argc, char* argv[], TStr& InFile, TStr& InFileAttr, TStr& Em
 	Verbose = Env.IsArgStr("-v", "Verbose output.");
 	Directed = Env.IsArgStr("-dr", "Graph is directed.");
 	Weighted = Env.IsArgStr("-w", "Graph is weighted.");
-	//OutputWalks = Env.IsArgStr("-ow", "Output random walks instead of embeddings.");
 }
 
 
@@ -151,9 +150,6 @@ int main(int argc, char* argv[]) {
 	struct n2v_args fairn2v_args = {.net = InNet, .dim = Dimensions, .walklen = WalkLen, .numwalks = NumWalks, .winsize = WinSize, .iter = Iter, .directed = Directed, .weighted = Weighted, .verbose = Verbose};
 
 
-	// Define number of threads to use.
-	//omp_set_num_threads(20);
-
 	// Initialize graph object
 	graph g(InFile.CStr(), InFileAttr.CStr()); // Load graph.
 
@@ -170,11 +166,8 @@ int main(int argc, char* argv[]) {
 
 	// Initializations.
 	srand(time(NULL)); // Seed for rand() from clock.
-	//pagerank_algorithms algs(g); // Init algorithms class.
 	int number_of_nodes = g.get_num_nodes(); // Dimension of points.
-	//pagerank_v temp_fair_pagerank; // For temp_best in each iteration.
-	//pagerank_v pagerank; // Pagerank vector.
-
+	
 	fairn2v_args.initial_transmtrx = cr_matrix(number_of_nodes, number_of_nodes);
 	fairn2v_args.transmtrx = cr_matrix(number_of_nodes, number_of_nodes);
 	fairn2v_args.residuals = calc_residuals(g, phi);
@@ -195,11 +188,6 @@ int main(int argc, char* argv[]) {
 	for(int i=1; i<NUM_POINTS; i++)
 		current_point[i] = get_random_initial_point(g);
 
-	// Initialize start point.
-	// current_point = algs.get_proportional_excess_vector();
-	// current_point = get_uniform_initial_point(g);
-	//current_point = get_random_initial_point(g);
-
 	for(int i=0; i<NUM_POINTS; i++)
 	{
 		std::cout << "Calculating initial loss value for point " << i+1 << "\n";
@@ -208,19 +196,6 @@ int main(int argc, char* argv[]) {
 		node2vec(InNet, fairn2v_args.transmtrx, fairn2v_args.dim, fairn2v_args.walklen, fairn2v_args.numwalks, fairn2v_args.winsize, fairn2v_args.iter, fairn2v_args.verbose, fairn2v_args.walks, fairn2v_args.embeddings);
 		current_loss_function_value[i] = loss_function_at(g, EmbeddingsHV, fairn2v_args.embeddings, fairn2v_args.dim);
 		candidate_loss_value = current_loss_function_value[i];
-
-	// Get custom LFPR.
-	//current_pagerank = algs.get_custom_step_fair_pagerank(current_point);
-	//current_loss_function_value = loss_function_at(pagerank, current_pagerank, number_of_nodes);
-	//candidate_loss_value = current_loss_function_value;
-	//previous_loss_function_value = current_loss_function_value;
-
-	// Start search iterations.
-	//while (whole_iterations < MAX_ITERATIONS) {
-		// Print for knowing the stage for big Networks
-		// that program is slow.
-		//std::cout << "Iteration:" << whole_iterations+1 << "\n";
-		//whole_iterations++;
 
 		for(int j=0; j<MAX_ITERATIONS; j++)
 		{
@@ -247,13 +222,9 @@ int main(int argc, char* argv[]) {
 
 		// Renew values.
 		current_point[i] = candidate_point;
-		//previous_loss_function_value = current_loss_function_value;
 		current_loss_function_value[i] = candidate_loss_value;
 		std::cout << "Point " << i+1 << " minimized loss value: " << current_loss_function_value[i] << std::endl;
-		//std::cout << "loss------------------------->" << current_loss_function_value << std::endl;
-
-		// Renew time interval.
-
+		
 	}
 
 	int result_point_index = std::distance(current_loss_function_value, std::min_element(current_loss_function_value, current_loss_function_value + (NUM_POINTS-1)));
@@ -265,14 +236,6 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "Global minimized loss value: " << current_loss_function_value[result_point_index] << std::endl;
 	WriteOutput(EmbsOutFile, WalksOutFile, fairn2v_args.embeddings, fairn2v_args.walks);
-	//calc_transmtrx(g, transmtrx, initial_transmtrx, residuals, current_point);
-	//node2vec(InNet, transmtrx, Dimensions, WalkLen, NumWalks, WinSize, Iter, Verbose, OutputWalks, WalksVV, FairEmbeddingsHV);
-
-	// Get best custom LFPR so far.
-	//temp_fair_pagerank = algs.get_custom_step_fair_pagerank(current_point);
-
-	// Test print. You can ignore.
-	//std::cout << "red ratio: " << g.get_pagerank_per_community(temp_fair_pagerank)[1];
-
+	
 	return 0;
 }

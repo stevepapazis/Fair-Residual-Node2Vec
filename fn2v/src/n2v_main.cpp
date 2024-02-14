@@ -24,7 +24,6 @@ void ParseArgs(int& argc, char* argv[], TStr& InFile, TStr& InFileAttr, TStr& Em
 	Verbose = Env.IsArgStr("-v", "Verbose output.");
 	Directed = Env.IsArgStr("-dr", "Graph is directed.");
 	Weighted = Env.IsArgStr("-w", "Graph is weighted.");
-	//OutputWalks = Env.IsArgStr("-ow", "Output random walks instead of embeddings.");
 }
 
 

@@ -135,36 +135,7 @@ void PreprocessNode (PWNet& InNet, double* TransMtrx, TWNet::TNodeI NI, int64& N
     PTable.Add(TransMtrx[j]);
   }
   GetNodeAlias(PTable,NI.GetDat().GetDat(NI.GetId()));
-  /*//for node t
-  THash <TInt, TBool> NbrH;                                    //Neighbors of t
-  for (int64 i = 0; i < NI.GetOutDeg(); i++) {
-    NbrH.AddKey(NI.GetNbrNId(i));
-  } 
-  for (int64 i = 0; i < NI.GetOutDeg(); i++) {
-    TWNet::TNodeI CurrI = InNet->GetNI(NI.GetNbrNId(i));      //for each node v
-    double Psum = 0;
-    TFltV PTable;                              //Probability distribution table
-    for (int64 j = 0; j < CurrI.GetOutDeg(); j++) {           //for each node x
-      int64 FId = CurrI.GetNbrNId(j);
-      TFlt Weight;
-      if (!(InNet->GetEDat(CurrI.GetId(), FId, Weight))){ continue; }
-      if (FId==NI.GetId()) {
-        PTable.Add(Weight / 1);
-        Psum += Weight / 1;
-      } else if (NbrH.IsKey(FId)) {
-        PTable.Add(Weight);
-        Psum += Weight;
-      } else {
-        PTable.Add(Weight / 1);
-        Psum += Weight / 1;
-      }
-    }
-    //Normalizing table
-    for (int64 j = 0; j < CurrI.GetOutDeg(); j++) {
-      PTable[j] /= Psum;
-    }
-    GetNodeAlias(PTable,CurrI.GetDat().GetDat(NI.GetId()));
-  }*/
+  
   NCnt++;
 }
 
@@ -174,15 +145,9 @@ void PreprocessResTransitionProbs(PWNet& InNet, double** TransMtrx, const bool& 
   for (TWNet::TNodeI NI = InNet->BegNI(); NI < InNet->EndNI(); NI++) {
     InNet->SetNDat(NI.GetId(),TIntIntVFltVPrH());
     NI.GetDat().AddDat(NI.GetId(), TPair<TIntV, TFltV>(TIntV(InNet->GetNodes()), TFltV(InNet->GetNodes())));
-    //InNet->SetNDat(NI.GetId(), TPair<TIntV, TFltV>(TIntV(InNet->GetNodes()), TFltV(InNet->GetNodes())));
     NIds.Add(NI.GetId());
   }
-  /*for (TWNet::TNodeI NI = InNet->BegNI(); NI < InNet->EndNI(); NI++) {
-    for (int64 i = 0; i < NI.GetOutDeg(); i++) {                    //allocating space in advance to avoid issues with multithreading
-      TWNet::TNodeI CurrI = InNet->GetNI(NI.GetNbrNId(i));
-      CurrI.GetDat().AddDat(NI.GetId(),TPair<TIntV,TFltV>(TIntV(CurrI.GetOutDeg()),TFltV(CurrI.GetOutDeg())));
-    }
-  }*/
+ 
   int64 NCnt = 0;
 #pragma omp parallel for schedule(dynamic)
   for (int64 i = 0; i < NIds.Len(); i++) {
@@ -202,12 +167,7 @@ int64 PredictResidualMemReq(PWNet& InNet) {
 void SimulateResidualWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& WalkV) {
   WalkV.Add(StartNId);
   if (WalkLen == 1) { return; }
-  //if (InNet->GetNI(StartNId).GetOutDeg() == 0) { return; }
-  //WalkV.Add(InNet->GetNI(StartNId).GetNbrNId(Rnd.GetUniDevInt(InNet->GetNI(StartNId).GetOutDeg())));
   while (WalkV.Len() < WalkLen) {
-    //int64 Dst = WalkV.Last();
-    //int64 Src = WalkV.LastLast();
-    //if (InNet->GetNI(Dst).GetOutDeg() == 0) { return; }
     int64 Next = AliasDrawInt(InNet->GetNDat(WalkV.Last()).GetDat(WalkV.Last()), Rnd);
     WalkV.Add(Next);
   }
